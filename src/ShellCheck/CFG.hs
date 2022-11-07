@@ -34,7 +34,6 @@ module ShellCheck.CFG (
     IdTagged (..),
     Scope (..),
     buildGraph
-    , ShellCheck.CFG.runTests -- STRIP
     )
   where
 
@@ -1302,6 +1301,3 @@ findPostDominators mainexit graph = asArray
     postDoms = dom reversed mainexit
     (_, maxNode) = nodeRange graph
     asArray = array (0, maxNode) postDoms
-
-return []
-runTests =  $( [| $(forAllProperties) (quickCheckWithResult (stdArgs { maxSuccess = 1 }) ) |])

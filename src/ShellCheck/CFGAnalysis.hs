@@ -17,7 +17,6 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -}
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE DeriveAnyClass, DeriveGeneric #-}
 
@@ -58,7 +57,6 @@ module ShellCheck.CFGAnalysis (
     ,getIncomingState
     ,getOutgoingState
     ,doesPostDominate
-    ,ShellCheck.CFGAnalysis.runTests -- STRIP
     ) where
 
 import Control.DeepSeq
@@ -1409,8 +1407,3 @@ analyzeStragglers ctx state stragglers = do
         writeSTRef (cOutput ctx) state
         writeSTRef (cNode ctx) entry
         transferFunctionValue ctx def
-
-
-
-return []
-runTests = $quickCheckAll

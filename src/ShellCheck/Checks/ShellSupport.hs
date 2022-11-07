@@ -17,9 +17,8 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -}
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE FlexibleContexts #-}
-module ShellCheck.Checks.ShellSupport (checker , ShellCheck.Checks.ShellSupport.runTests) where
+module ShellCheck.Checks.ShellSupport (checker) where
 
 import ShellCheck.AST
 import ShellCheck.ASTLib
@@ -557,6 +556,3 @@ checkPS1Assignments = ForShell [Bash] f
     enclosedRegex = mkRegex "\\\\\\[.*\\\\\\]" -- FIXME: shouldn't be eager
     escapeRegex = mkRegex "\\\\x1[Bb]|\\\\e|\x1B|\\\\033"
 
-
-return []
-runTests =  $( [| $(forAllProperties) (quickCheckWithResult (stdArgs { maxSuccess = 1 }) ) |])

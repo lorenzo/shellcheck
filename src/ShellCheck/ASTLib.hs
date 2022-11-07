@@ -17,7 +17,6 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -}
-{-# LANGUAGE TemplateHaskell #-}
 module ShellCheck.ASTLib where
 
 import ShellCheck.AST
@@ -902,6 +901,3 @@ getEnableDirectives root =
     case root of
         T_Annotation _ list _ -> [s | EnableComment s <- list]
         _ -> []
-
-return []
-runTests = $quickCheckAll

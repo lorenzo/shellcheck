@@ -17,8 +17,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -}
-{-# LANGUAGE TemplateHaskell #-}
-module ShellCheck.Checker (checkScript, ShellCheck.Checker.runTests) where
+module ShellCheck.Checker (checkScript) where
 
 import ShellCheck.Analyzer
 import ShellCheck.ASTLib
@@ -507,6 +506,3 @@ prop_rcCanSuppressEarlyProblems2 = null result
     result = checkWithRc "disable=1104" emptyCheckSpec {
         csScript = "!/bin/bash\necho 'hello world'"
     }
-
-return []
-runTests = $quickCheckAll

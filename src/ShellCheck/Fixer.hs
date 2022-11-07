@@ -18,8 +18,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -}
 
-{-# LANGUAGE TemplateHaskell #-}
-module ShellCheck.Fixer (applyFix, removeTabStops, mapPositions, Ranged(..), runTests) where
+module ShellCheck.Fixer (applyFix, removeTabStops, mapPositions, Ranged(..)) where
 
 import ShellCheck.Interface
 import ShellCheck.Prelude
@@ -328,84 +327,3 @@ tFromStart start end repl order =
         repPrecedence = order,
         repInsertionPoint = InsertAfter
     }
-
-tFromEnd start end repl order =
-    (tFromStart start end repl order) {
-        repInsertionPoint = InsertBefore
-    }
-
-prop_simpleFix1 = testFixes "hello world" "hell world" [
-    testFix [
-        tFromEnd 5 5 "o" 1
-    ]]
-
-prop_anchorsLeft = testFixes "-->foobar<--" "--><--" [
-    testFix [
-        tFromStart 4 4 "foo" 1,
-        tFromStart 4 4 "bar" 2
-    ]]
-
-prop_anchorsRight = testFixes "-->foobar<--" "--><--" [
-    testFix [
-        tFromEnd 4 4 "bar" 1,
-        tFromEnd 4 4 "foo" 2
-    ]]
-
-prop_anchorsBoth1 = testFixes "-->foobar<--" "--><--" [
-    testFix [
-        tFromStart 4 4 "bar" 2,
-        tFromEnd 4 4 "foo" 1
-    ]]
-
-prop_anchorsBoth2 = testFixes "-->foobar<--" "--><--" [
-    testFix [
-        tFromEnd 4 4 "foo" 2,
-        tFromStart 4 4 "bar" 1
-    ]]
-
-prop_composeFixes1 = testFixes "cd \"$1\" || exit" "cd $1" [
-    testFix [
-        tFromStart 4 4 "\"" 10,
-        tFromEnd   6 6 "\"" 10
-    ],
-    testFix [
-        tFromEnd 6 6 " || exit" 5
-    ]]
-
-prop_composeFixes2 = testFixes "$(\"$1\")" "`$1`" [
-    testFix [
-        tFromStart 1 2 "$(" 5,
-        tFromEnd   4 5 ")" 5
-    ],
-    testFix [
-        tFromStart 2 2 "\"" 10,
-        tFromEnd 4 4 "\"" 10
-    ]]
-
-prop_composeFixes3 = testFixes "(x)[x]" "xx" [
-    testFix [
-        tFromStart 1 1 "(" 4,
-        tFromEnd   2 2 ")" 3,
-        tFromStart 2 2 "[" 2,
-        tFromEnd   3 3 "]" 1
-    ]]
-
-prop_composeFixes4 = testFixes "(x)[x]" "xx" [
-    testFix [
-        tFromStart 1 1 "(" 4,
-        tFromStart 2 2 "[" 3,
-        tFromEnd   2 2 ")" 2,
-        tFromEnd   3 3 "]" 1
-    ]]
-
-prop_composeFixes5 = testFixes "\"$(x)\"" "`x`" [
-    testFix [
-        tFromStart 1 2 "$(" 2,
-        tFromEnd   3 4 ")"  2,
-        tFromStart 1 1 "\"" 1,
-        tFromEnd   4 4 "\"" 1
-    ]]
-
-
-return []
-runTests = $quickCheckAll

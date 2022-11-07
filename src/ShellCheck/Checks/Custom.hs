@@ -3,8 +3,7 @@
     However, there are no guarantees regarding compatibility between versions.
 -} 
 
-{-# LANGUAGE TemplateHaskell #-}
-module ShellCheck.Checks.Custom (checker, ShellCheck.Checks.Custom.runTests) where
+module ShellCheck.Checks.Custom (checker) where
 
 import ShellCheck.AnalyzerLib
 import Test.QuickCheck
@@ -16,6 +15,3 @@ checker params = Checker {
   }
 
 prop_CustomTestsWork = True
-
-return []
-runTests = $quickCheckAll
