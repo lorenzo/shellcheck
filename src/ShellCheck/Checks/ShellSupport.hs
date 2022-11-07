@@ -17,10 +17,9 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -}
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ViewPatterns #-}
-module ShellCheck.Checks.ShellSupport (checker , ShellCheck.Checks.ShellSupport.runTests) where
+module ShellCheck.Checks.ShellSupport (checker) where
 
 import ShellCheck.AST
 import ShellCheck.ASTLib
@@ -636,6 +635,3 @@ checkBangAfterPipe = ForShell [Dash, BusyboxSh, Sh, Bash] f
         T_Banged id _ ->
             err id 2326 "! is not allowed in the middle of pipelines. Use command group as in cmd | { ! cmd; } if necessary."
         _ -> return ()
-
-return []
-runTests =  $( [| $(forAllProperties) (quickCheckWithResult (stdArgs { maxSuccess = 1 }) ) |])

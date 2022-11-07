@@ -17,11 +17,10 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -}
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE MultiWayIf #-}
-module ShellCheck.Parser (parseScript, runTests) where
+module ShellCheck.Parser (parseScript) where
 
 import ShellCheck.AST
 import ShellCheck.ASTLib hiding (runTests)
@@ -3636,6 +3635,3 @@ tryWithErrors parser = do
         endInput <- getInput
         endState <- getState
         return (result, endPos, endInput, endState)
-
-return []
-runTests = $quickCheckAll

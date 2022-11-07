@@ -17,12 +17,11 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -}
-{-# LANGUAGE TemplateHaskell #-}
 
 -- Checks that run on the Control Flow Graph (as opposed to the AST)
 -- This is scaffolding for a work in progress.
 
-module ShellCheck.Checks.ControlFlow (checker, optionalChecks, ShellCheck.Checks.ControlFlow.runTests) where
+module ShellCheck.Checks.ControlFlow (checker, optionalChecks) where
 
 import ShellCheck.AST
 import ShellCheck.ASTLib
@@ -95,7 +94,3 @@ runEffectChecks list = checkNode
         case label of
             CFApplyEffects effects -> mapM_ (\effect -> mapM_ (\c -> c effect node prepost) list) effects
             _ -> return ()
-
-
-return []
-runTests =  $( [| $(forAllProperties) (quickCheckWithResult (stdArgs { maxSuccess = 1 }) ) |])

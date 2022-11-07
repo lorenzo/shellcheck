@@ -17,8 +17,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -}
-{-# LANGUAGE TemplateHaskell #-}
-module ShellCheck.Checker (checkScript, ShellCheck.Checker.runTests) where
+module ShellCheck.Checker (checkScript) where
 
 import ShellCheck.Analyzer
 import ShellCheck.ASTLib
@@ -559,6 +558,3 @@ prop_flagWinsWhenSuppressingDfa2 = null result
         csScript = "#!/bin/sh\n# shellcheck extended-analysis=true\nexit; foo;",
         csExtendedAnalysis = Just False
     }
-
-return []
-runTests = $quickCheckAll

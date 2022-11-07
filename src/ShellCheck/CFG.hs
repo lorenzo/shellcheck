@@ -34,7 +34,6 @@ module ShellCheck.CFG (
     IdTagged (..),
     Scope (..),
     buildGraph
-    , ShellCheck.CFG.runTests -- STRIP
     )
   where
 
@@ -1308,6 +1307,3 @@ findPostDominators mainexit graph = asArray
     -- inspecting/debugging, so fill the array first and then update.
     initializedArray = listArray (0, maxNode) $ repeat []
     asArray = initializedArray // postDoms
-
-return []
-runTests =  $( [| $(forAllProperties) (quickCheckWithResult (stdArgs { maxSuccess = 1 }) ) |])

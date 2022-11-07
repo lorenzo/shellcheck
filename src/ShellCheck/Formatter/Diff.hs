@@ -17,8 +17,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -}
-{-# LANGUAGE TemplateHaskell #-}
-module ShellCheck.Formatter.Diff (format, ShellCheck.Formatter.Diff.runTests) where
+module ShellCheck.Formatter.Diff (format) where
 
 import ShellCheck.Interface
 import ShellCheck.Fixer
@@ -249,6 +248,3 @@ prop_splitsIntoMultipleHunksUnlessTouching = groupDiff [l 1, b 1, b 2, b 3, b 4,
 
 prop_countDeltasWorks = countDelta [b 1, l 2, r 3, r 4, b 5] == (3,4)
 prop_countDeltasWorks2 = countDelta [] == (0,0)
-
-return []
-runTests = $quickCheckAll
