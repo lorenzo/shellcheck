@@ -17,13 +17,12 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -}
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE PatternGuards #-}
 
 -- This module contains checks that examine specific commands by name.
-module ShellCheck.Checks.Commands (checker, optionalChecks, ShellCheck.Checks.Commands.runTests) where
+module ShellCheck.Checks.Commands (checker, optionalChecks) where
 
 import ShellCheck.AST
 import ShellCheck.ASTLib
@@ -1467,7 +1466,3 @@ checkBackreferencingDeclaration cmd = CommandCheck (Exactly cmd) check
         case e of
             IdTagged id (CFReadVariable name) -> return (name, id)
             _ -> Nothing
-
-
-return []
-runTests =  $( [| $(forAllProperties) (quickCheckWithResult (stdArgs { maxSuccess = 1 }) ) |])
