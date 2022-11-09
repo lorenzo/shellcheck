@@ -927,7 +927,3 @@ modifiesVariable params token name =
         case t of
             Assignment (_, _, n, source) -> isTrueAssignmentSource source && n == name
             _ -> False
-
-
-return []
-runTests =  $( [| $(forAllProperties) (quickCheckWithResult (stdArgs { maxSuccess = 1 }) ) |])
