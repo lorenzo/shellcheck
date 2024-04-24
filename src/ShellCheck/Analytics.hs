@@ -4999,3 +4999,82 @@ checkUnnecessaryParens params t =
             replaceStart id params 1 "", -- Remove "("
             replaceEnd id params 1 ""    -- Remove ")"
         ]
+
+
+prop_checkPlusEqualsNumber1 = verify checkPlusEqualsNumber "x+=1"
+prop_checkPlusEqualsNumber2 = verify checkPlusEqualsNumber "x+=42"
+prop_checkPlusEqualsNumber3 = verifyNot checkPlusEqualsNumber "(( x += 1 ))"
+prop_checkPlusEqualsNumber4 = verifyNot checkPlusEqualsNumber "declare -i x=0; x+=1"
+prop_checkPlusEqualsNumber5 = verifyNot checkPlusEqualsNumber "x+='1'"
+prop_checkPlusEqualsNumber6 = verifyNot checkPlusEqualsNumber "n=foo; x+=n"
+prop_checkPlusEqualsNumber7 = verify checkPlusEqualsNumber "n=4; x+=n"
+prop_checkPlusEqualsNumber8 = verify checkPlusEqualsNumber "n=4; x+=$n"
+prop_checkPlusEqualsNumber9 = verifyNot checkPlusEqualsNumber "declare -ia var; var[x]+=1"
+checkPlusEqualsNumber params t =
+    case t of
+        T_Assignment id Append var _ word -> sequence_ $ do
+            cfga <- cfgAnalysis params
+            state <- CF.getIncomingState cfga id
+            guard $ isNumber state word
+            guard . not $ fromMaybe False $ CF.variableMayBeDeclaredInteger state var
+            -- Recommend "typeset" because ksh does not have "declare".
+            return $ warn id 2324 "var+=1 will append, not increment. Use (( var += 1 )), typeset -i var, or quote number to silence."
+        _ -> return ()
+
+  where
+    isNumber state word =
+        let
+            unquotedLiteral = getUnquotedLiteral word
+            isEmpty = unquotedLiteral == Just ""
+            isUnquotedNumber = not isEmpty && maybe False (all isDigit) unquotedLiteral
+            isNumericalVariableName = fromMaybe False $ do
+                str <- unquotedLiteral
+                CF.variableMayBeAssignedInteger state str
+            isNumericalVariableExpansion =
+                case word of
+                    T_NormalWord _ [part] -> fromMaybe False $ do
+                        str <- getUnmodifiedParameterExpansion part
+                        CF.variableMayBeAssignedInteger state str
+                    _ -> False
+        in
+            isUnquotedNumber || isNumericalVariableName || isNumericalVariableExpansion
+
+
+
+prop_checkExpansionWithRedirection1 = verify checkExpansionWithRedirection "var=$(foo > bar)"
+prop_checkExpansionWithRedirection2 = verify checkExpansionWithRedirection "var=`foo 1> bar`"
+prop_checkExpansionWithRedirection3 = verify checkExpansionWithRedirection "var=${ foo >> bar; }"
+prop_checkExpansionWithRedirection4 = verify checkExpansionWithRedirection "var=$(foo | bar > baz)"
+prop_checkExpansionWithRedirection5 = verifyNot checkExpansionWithRedirection "stderr=$(foo 2>&1 > /dev/null)"
+prop_checkExpansionWithRedirection6 = verifyNot checkExpansionWithRedirection "var=$(foo; bar > baz)"
+prop_checkExpansionWithRedirection7 = verifyNot checkExpansionWithRedirection "var=$(foo > bar; baz)"
+prop_checkExpansionWithRedirection8 = verifyNot checkExpansionWithRedirection "var=$(cat <&3)"
+checkExpansionWithRedirection params t =
+    case t of
+        T_DollarExpansion id [cmd] -> check id cmd
+        T_Backticked id [cmd] -> check id cmd
+        T_DollarBraceCommandExpansion id [cmd] -> check id cmd
+        _ -> return ()
+  where
+    check id pipe =
+        case pipe of
+            (T_Pipeline _ _ t@(_:_)) -> checkCmd id (last t)
+            _ -> return ()
+
+    checkCmd captureId (T_Redirecting _ redirs _) = walk captureId redirs
+
+    walk captureId [] = return ()
+    walk captureId (t:rest) =
+        case t of
+            T_FdRedirect _ _ (T_IoDuplicate _ _ "1") -> return ()
+            T_FdRedirect id "1" (T_IoDuplicate _ _ _) -> return ()
+            T_FdRedirect id "" (T_IoDuplicate _ op _) | op `elem` [T_GREATAND (Id 0), T_Greater (Id 0)] -> emit id captureId True
+            T_FdRedirect id str (T_IoFile _ op file) | str `elem` ["", "1"] && op `elem` [ T_DGREAT (Id 0), T_Greater (Id 0) ]  ->
+                if getLiteralString file == Just "/dev/null"
+                then emit id captureId False
+                else emit id captureId True
+            _ -> walk captureId rest
+
+    emit redirectId captureId suggestTee = do
+        warn captureId 2327 "This command substitution will be empty because the command's output gets redirected away."
+        err redirectId 2328 $ "This redirection takes output away from the command substitution" ++ if suggestTee then " (use tee to duplicate)." else "."
